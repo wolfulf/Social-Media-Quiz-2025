@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Social-Media Quiz 2025</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f4f4f8;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 20px;
+      max-width: 660px;
+      width: 100%;
+      padding: 40px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+    }
+
+    /* ── Header ── */
+    .header { margin-bottom: 28px; }
+    .tag {
+      display: inline-block;
+      background: #1A1A2E;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    h1 { font-size: 22px; font-weight: 800; color: #1A1A2E; line-height: 1.3; }
+    .subtitle { font-size: 13px; color: #999; margin-top: 6px; }
+
+    /* ── Progress ── */
+    .progress-wrap { margin-bottom: 28px; }
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 8px;
+    }
+    .progress-bar {
+      height: 6px;
+      background: #ebebeb;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #E63946, #457B9D);
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── Question ── */
+    .question-num {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #E63946;
+      margin-bottom: 10px;
+    }
+    .question-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1A1A2E;
+      line-height: 1.45;
+      margin-bottom: 28px;
+    }
+
+    /* ── Options ── */
+    .options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      border: 2px solid #ebebeb;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 15px;
+      color: #1A1A2E;
+      font-weight: 500;
+      background: #fff;
+    }
+    .option:hover:not(.disabled) { border-color: #457B9D; background: #f0f6fb; }
+    .option .opt-letter {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: #f4f4f8;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: #888;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .option.selected { border-color: #457B9D; background: #eef5fb; }
+    .option.selected .opt-letter { background: #457B9D; color: #fff; }
+    .option.correct { border-color: #2A9D8F; background: #edfaf7; }
+    .option.correct .opt-letter { background: #2A9D8F; color: #fff; }
+    .option.wrong { border-color: #E63946; background: #fdf0f1; }
+    .option.wrong .opt-letter { background: #E63946; color: #fff; }
+    .option.disabled { cursor: default; }
+
+    /* ── Free text ── */
+    .free-input-wrap { margin-bottom: 24px; }
+    .free-input-wrap input {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid #ebebeb;
+      border-radius: 12px;
+      font-size: 15px;
+      color: #1A1A2E;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .free-input-wrap input:focus { border-color: #457B9D; }
+    .free-input-wrap input.correct-input { border-color: #2A9D8F; background: #edfaf7; }
+    .free-input-wrap input.wrong-input   { border-color: #E63946; background: #fdf0f1; }
+
+    /* ── Feedback ── */
+    .feedback {
+      display: none;
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .feedback.correct-fb { background: #edfaf7; color: #1e7a6d; border-left: 4px solid #2A9D8F; }
+    .feedback.wrong-fb   { background: #fdf0f1; color: #b52733; border-left: 4px solid #E63946; }
+
+    /* ── Button ── */
+    .btn {
+      display: inline-block;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: #1A1A2E;
+      color: #fff;
+      width: 100%;
+      text-align: center;
+    }
+    .btn-primary:hover { background: #2d2d50; }
+    .btn-primary:disabled { background: #ccc; cursor: default; }
+
+    /* ── Results ── */
+    .results { display: none; }
+    .score-circle {
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #E63946, #457B9D);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: #fff;
+      margin: 0 auto 28px;
+    }
+    .score-circle .score-num { font-size: 36px; font-weight: 900; line-height: 1; }
+    .score-circle .score-label { font-size: 12px; opacity: 0.85; }
+    .results h2 { text-align: center; font-size: 20px; color: #1A1A2E; margin-bottom: 6px; }
+    .results .results-sub { text-align: center; color: #999; font-size: 13px; margin-bottom: 28px; }
+
+    .result-list { display: flex; flex-direction: column; gap: 10px; }
+    .result-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .result-item.r-correct { background: #edfaf7; }
+    .result-item.r-wrong   { background: #fdf0f1; }
+    .result-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .result-q { font-weight: 700; color: #1A1A2E; margin-bottom: 3px; }
+    .result-a { color: #555; }
+    .result-a span { font-weight: 700; }
+
+    .btn-restart {
+      background: #1A1A2E; color: #fff;
+      width: 100%; margin-top: 24px;
+      text-align: center;
+    }
+    .btn-restart:hover { background: #2d2d50; }
+  </style>
+</head>
+<body>
+<div class="card">
+
+  <!-- Quiz view -->
+  <div id="quiz-view">
+    <div class="header">
+      <div class="tag">Social Media 2025</div>
+      <h1>Wie gut kennst du die Nutzungszahlen?</h1>
+      <p class="subtitle">ARD/ZDF-Medienstudie 2025 · 10 Fragen</p>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span id="q-counter">Frage 1 von 10</span>
+        <span id="q-score-live">0 richtig</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="question-num" id="q-num">Frage 1</div>
+    <div class="question-text" id="q-text"></div>
+
+    <div class="options" id="options-wrap"></div>
+    <div class="free-input-wrap" id="free-wrap" style="display:none">
+      <input type="number" id="free-input" placeholder="Deine Antwort in %" min="0" max="100" />
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <button class="btn btn-primary" id="action-btn" disabled>Antwort bestätigen</button>
+  </div>
+
+  <!-- Results view -->
+  <div class="results" id="results-view">
+    <div class="score-circle">
+      <span class="score-num" id="final-score">0</span>
+      <span class="score-label">von 10</span>
+    </div>
+    <h2 id="result-heading">Super gemacht!</h2>
+    <p class="results-sub" id="result-sub"></p>
+    <div class="result-list" id="result-list"></div>
+    <button class="btn btn-restart" onclick="restartQuiz()">Nochmal spielen 🔄</button>
+  </div>
+
+</div>
+
+<script>
+const questions = [
+  {
+    text: "Wie viel Prozent der 30–49-Jährigen nutzen Instagram mindestens einmal wöchentlich?",
+    type: "mc",
+    options: ["44 %", "54 %", "64 %", "34 %"],
+    correct: 1,
+    explanation: "Richtig! 54 % der 30–49-Jährigen nutzen Instagram wöchentlich."
+  },
+  {
+    text: "Welche Plattform hat bei den 14–29-Jährigen die höchste wöchentliche Nutzungsrate?",
+    type: "mc",
+    options: ["TikTok", "Snapchat", "Instagram", "Facebook"],
+    correct: 2,
+    explanation: "Instagram führt mit 77 % bei den 14–29-Jährigen – noch vor Snapchat (53 %) und TikTok (50 %)."
+  },
+  {
+    text: "Wie viel Prozent der Gesamtbevölkerung (ab 14 J.) nutzen Facebook wöchentlich?",
+    type: "free",
+    correct: 31,
+    tolerance: 5,
+    explanation: "Der korrekte Wert ist 31 %."
+  },
+  {
+    text: "Wie hoch ist die wöchentliche TikTok-Nutzung bei den 50–69-Jährigen?",
+    type: "mc",
+    options: ["3 %", "12 %", "7 %", "20 %"],
+    correct: 2,
+    explanation: "Nur 7 % der 50–69-Jährigen nutzen TikTok wöchentlich."
+  },
+  {
+    text: "Wie viel Prozent der ab 70-Jährigen nutzen Facebook mindestens wöchentlich?",
+    type: "free",
+    correct: 13,
+    tolerance: 5,
+    explanation: "13 % der ab 70-Jährigen nutzen Facebook – die stärkste Plattform in dieser Altersgruppe."
+  },
+  {
+    text: "Snapchat wird von wie vielen Prozent der 14–29-Jährigen wöchentlich genutzt?",
+    type: "mc",
+    options: ["43 %", "53 %", "63 %", "33 %"],
+    correct: 1,
+    explanation: "53 % der 14–29-Jährigen sind wöchentlich auf Snapchat aktiv."
+  },
+  {
+    text: "Welche Plattform hat bei den ab 70-Jährigen die HÖCHSTE Nutzungsrate?",
+    type: "mc",
+    options: ["Instagram", "Facebook", "Pinterest", "X (Twitter)"],
+    correct: 1,
+    explanation: "Facebook ist mit 13 % die beliebteste Plattform bei den ab 70-Jährigen."
+  },
+  {
+    text: "Wie viel Prozent der Gesamtbevölkerung nutzen Instagram wöchentlich?",
+    type: "free",
+    correct: 40,
+    tolerance: 5,
+    explanation: "40 % der Gesamtbevölkerung (ab 14 J.) nutzen Instagram mindestens wöchentlich."
+  },
+  {
+    text: "Wie viel Prozent der 30–49-Jährigen nutzen X (Twitter) wöchentlich?",
+    type: "mc",
+    options: ["5 %", "8 %", "11 %", "16 %"],
+    correct: 2,
+    explanation: "11 % der 30–49-Jährigen sind wöchentlich auf X (Twitter) aktiv."
+  },
+  {
+    text: "Bluesky wird von wie vielen Prozent der 14–29-Jährigen wöchentlich genutzt?",
+    type: "mc",
+    options: ["2 %", "4 %", "6 %", "9 %"],
+    correct: 2,
+    explanation: "6 % der 14–29-Jährigen nutzen Bluesky wöchentlich."
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+let userAnswers = [];
+
+const letters = ['A','B','C','D'];
+
+function renderQuestion() {
+  const q = questions[current];
+  answered = false;
+
+  document.getElementById('q-num').textContent = `Frage ${current + 1}`;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('q-counter').textContent = `Frage ${current + 1} von 10`;
+  document.getElementById('q-score-live').textContent = `${score} richtig`;
+  document.getElementById('progress-fill').style.width = `${(current / 10) * 100}%`;
+
+  const feedback = document.getElementById('feedback');
+  feedback.style.display = 'none';
+  feedback.className = 'feedback';
+
+  const btn = document.getElementById('action-btn');
+  btn.textContent = 'Antwort bestätigen';
+  btn.disabled = true;
+
+  const optWrap = document.getElementById('options-wrap');
+  const freeWrap = document.getElementById('free-wrap');
+  const freeInput = document.getElementById('free-input');
+
+  optWrap.innerHTML = '';
+
+  if (q.type === 'mc') {
+    optWrap.style.display = 'flex';
+    freeWrap.style.display = 'none';
+    q.options.forEach((opt, i) => {
+      const div = document.createElement('div');
+      div.className = 'option';
+      div.innerHTML = `<div class="opt-letter">${letters[i]}</div><span>${opt}</span>`;
+      div.addEventListener('click', () => selectOption(i, div));
+      optWrap.appendChild(div);
+    });
+  } else {
+    optWrap.style.display = 'none';
+    freeWrap.style.display = 'block';
+    freeInput.value = '';
+    freeInput.className = '';
+    freeInput.disabled = false;
+    freeInput.addEventListener('input', () => {
+      btn.disabled = freeInput.value.trim() === '';
+    });
+  }
+}
+
+let selectedIndex = null;
+
+function selectOption(i, el) {
+  if (answered) return;
+  selectedIndex = i;
+  document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('action-btn').disabled = false;
+}
+
+document.getElementById('action-btn').addEventListener('click', () => {
+  if (answered) {
+    current++;
+    if (current < questions.length) renderQuestion();
+    else showResults();
+    return;
+  }
+
+  const q = questions[current];
+  answered = true;
+  let isCorrect = false;
+
+  if (q.type === 'mc') {
+    isCorrect = selectedIndex === q.correct;
+    document.querySelectorAll('.option').forEach((el, i) => {
+      el.classList.add('disabled');
+      if (i === q.correct) el.classList.add('correct');
+      else if (i === selectedIndex) el.classList.add('wrong');
+    });
+    userAnswers.push({
+      question: q.text,
+      userAnswer: q.options[selectedIndex],
+      correctAnswer: q.options[q.correct],
+      correct: isCorrect
+    });
+  } else {
+    const val = parseFloat(document.getElementById('free-input').value);
+    isCorrect = Math.abs(val - q.correct) <= q.tolerance;
+    const inp = document.getElementById('free-input');
+    inp.disabled = true;
+    inp.className = isCorrect ? 'correct-input' : 'wrong-input';
+    userAnswers.push({
+      question: q.text,
+      userAnswer: val + ' %',
+      correctAnswer: q.correct + ' %',
+      correct: isCorrect
+    });
+  }
+
+  if (isCorrect) score++;
+
+  const feedback = document.getElementById('feedback');
+  feedback.style.display = 'block';
+  if (isCorrect) {
+    feedback.className = 'feedback correct-fb';
+    feedback.innerHTML = `✅ Richtig! ${q.explanation}`;
+  } else {
+    feedback.className = 'feedback wrong-fb';
+    feedback.innerHTML = `❌ Leider falsch. ${q.explanation}`;
+  }
+
+  document.getElementById('q-score-live').textContent = `${score} richtig`;
+  const btn = document.getElementById('action-btn');
+  btn.disabled = false;
+  btn.textContent = current < questions.length - 1 ? 'Nächste Frage →' : 'Ergebnis anzeigen →';
+});
+
+function showResults() {
+  document.getElementById('quiz-view').style.display = 'none';
+  const rv = document.getElementById('results-view');
+  rv.style.display = 'block';
+
+  document.getElementById('final-score').textContent = score;
+
+  let heading, sub;
+  if (score >= 9) { heading = '🏆 Hervorragend!'; sub = 'Du kennst die ARD/ZDF-Medienstudie 2025 wie dein eigenes Wohnzimmer.'; }
+  else if (score >= 7) { heading = '🎉 Sehr gut!'; sub = 'Starkes Ergebnis – du hast die Zahlen wirklich drauf.'; }
+  else if (score >= 5) { heading = '👍 Solide!'; sub = 'Gutes Grundwissen – ein paar Zahlen noch verinnerlichen.'; }
+  else { heading = '📚 Noch Luft nach oben.'; sub = 'Lies die Studie nochmal – dann klappt\'s beim nächsten Mal besser!'; }
+
+  document.getElementById('result-heading').textContent = heading;
+  document.getElementById('result-sub').textContent = sub;
+
+  const list = document.getElementById('result-list');
+  list.innerHTML = '';
+  userAnswers.forEach(a => {
+    const div = document.createElement('div');
+    div.className = `result-item ${a.correct ? 'r-correct' : 'r-wrong'}`;
+    div.innerHTML = `
+      <div class="result-icon">${a.correct ? '✅' : '❌'}</div>
+      <div>
+        <div class="result-q">${a.question}</div>
+        <div class="result-a">Deine Antwort: <span>${a.userAnswer}</span>${!a.correct ? ` · Richtig: <span>${a.correctAnswer}</span>` : ''}</div>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+function restartQuiz() {
+  current = 0; score = 0; userAnswers = []; selectedIndex = null;
+  document.getElementById('results-view').style.display = 'none';
+  document.getElementById('quiz-view').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
